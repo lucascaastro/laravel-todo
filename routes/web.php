@@ -21,7 +21,7 @@ Route::post('/signin', [AuthController::class, 'signin'])->name('signin');
 Route::post('/signup', [AuthController::class, 'signup'])->name('signup');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware('auth')->group(function() {
+Route::middleware('auth')->group(function () {
     Route::get('dashboard', [TodoController::class, 'index'])->name('dashboard');
     Route::post('/todos', [TodoController::class, 'store']);
     Route::get('/todos/{todo}/complete', [TodoController::class, 'complete']);

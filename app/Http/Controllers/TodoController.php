@@ -51,7 +51,6 @@ class TodoController extends Controller
 
         $attributes = $request->only([
             'title',
-            'description',
             'color'
         ]);
 
@@ -76,7 +75,7 @@ class TodoController extends Controller
         $user = auth()->user();
 
         $response = $this->service->complete($todo->id, $user->id);
-        
+
         return redirect('/dashboard')->with(
             $response['success'] ? 'success' : 'error',
             $response['message']
@@ -91,6 +90,7 @@ class TodoController extends Controller
      */
     public function destroy(Todo $todo)
     {
+        $user = auth()->user();
         $response = $this->service->destroy($todo->id, $user->id);
 
         return redirect('/dashboard')->with(
