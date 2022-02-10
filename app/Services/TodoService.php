@@ -52,6 +52,7 @@ class TodoService
      * @param  int  $userId
      * @return array
      */
+
     public function complete(int $id, int $userId)
     {
         DB::beginTransaction();
@@ -81,6 +82,39 @@ class TodoService
         return [
             'success' => true,
             'message' => 'TODO completado com sucesso',
+            'data' => $todo->fresh()
+        ];
+    }
+
+    public function update(int $id, $attributes)
+    {
+        DB::beginTransaction();
+        try {
+            $todo = $this->repository->find($id);
+
+            // Verificar se TODO é do usuário
+            if ($todo->user_id !== $attributes['user_id']) {
+                DB::rollback();
+                return [
+                    'success' => false,
+                    'message' => 'Erro ao encontrar TODO'
+                ];
+            }
+
+            $this->repository->update($attributes, $id);
+        } catch (\Throwable $th) {
+            DB::rollback();
+            logger()->error($th);
+            return [
+                'success' => false,
+                'message' => 'Erro ao atualizar TODO'
+            ];
+        }
+
+        DB::commit();
+        return [
+            'success' => true,
+            'message' => 'TODO atualizado com sucesso',
             'data' => $todo->fresh()
         ];
     }

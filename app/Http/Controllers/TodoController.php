@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
+use Illuminate\Http\Request;
 use App\Services\TodoService;
 use App\Repositories\TodoRepository;
 use App\Http\Requests\StoreTodoRequest;
@@ -65,12 +66,46 @@ class TodoController extends Controller
         return redirect('/dashboard')->with('success', $response['message']);
     }
 
+    public function edit(Todo $todo)
+    {
+        $user = auth()->user();
+
+        if ($todo->user_id !== $user->id) {
+            abort(404);
+        }
+
+        return view('edit', compact('user', 'todo'));
+    }
     /**
      * Complete the specified resource in storage.
      *
      * @param  \App\Models\Todo  $todo
      * @return \Illuminate\Http\Response
      */
+    public function update(Todo $todo, Request $request)
+    {
+        $user = auth()->user();
+
+        if ($user->id !== $todo->user_id) {
+            abort(403);
+        }
+
+        $attributes = $request->only([
+            'title',
+            'description',
+            'color'
+        ]);
+
+        $attributes['user_id'] = $user->id;
+
+        $response = $this->service->update($todo->id, $attributes);
+        if (!$response['success']) {
+            return redirect('/todos/create')->with('error', $response['message']);
+        }
+
+        return redirect('dashboard');
+    }
+
     public function complete(Todo $todo)
     {
         $user = auth()->user();
